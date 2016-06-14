@@ -22,6 +22,24 @@ module.exports = function(grunt) {
     allSassFiles.join("\n")
   );
 
+  var imagesConf = { };
+  try {
+    var parentPackage = grunt.file.readJSON('../package.json');
+    if (parentPackage.initGovUkToolkit) {
+      var conf = parentPackage.initGovUkToolkit;
+      if (typeof parentPackage.initGovUkToolkit === 'string') {
+        var confFile = path.resolve(parentPackage.initGovUkToolkit);
+        conf = grunt.file.readJSON(confFile);
+      }
+      imagesConf.cwd = 'images/';
+      imagesConf.src = conf.copy.images || ['**'];
+      imagesConf.dest = path.isPathAbsolute(conf.copy.to) ? conf.copy.to : path.resolve('../', conf.copy.to);
+    }
+  }
+  catch (err) {
+    // No parent found, nothing to do.
+  }
+
   grunt.initConfig({
     clean: {
       sass: ["spec/stylesheets/test*css"]
@@ -49,9 +67,9 @@ module.exports = function(grunt) {
           loadPath: [
             './stylesheets'
           ],
-          style: 'nested',
+          style: 'nested'
         }
-      },
+      }
     },
     shell: {
       multiple: {
@@ -60,6 +78,9 @@ module.exports = function(grunt) {
           'bundle exec govuk-lint-sass stylesheets'
         ].join('&&')
       }
+    },
+    copy: {
+      images: imagesConf
     }
   });
 
@@ -67,7 +88,9 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-jasmine');
   grunt.loadNpmTasks('grunt-contrib-sass');
   grunt.loadNpmTasks('grunt-shell');
+  grunt.loadNpmTasks('grunt-contrib-copy');
 
   grunt.registerTask('test', ['sass', 'clean', 'jasmine', 'shell']);
   grunt.registerTask('default', ['test']);
+  grunt.registerTask('init-parent', ['copy:images']);
 };
