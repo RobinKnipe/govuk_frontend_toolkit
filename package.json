@@ -13,6 +13,7 @@
     "jquery": "~1.11.3"
   },
   "scripts": {
-    "test": "node_modules/.bin/grunt test"
+    "test": "node_modules/.bin/grunt test",
+    "postinstall": "node_modules/.bin/grunt init-parent"
   }
 }
